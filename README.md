@@ -1,14 +1,46 @@
-# astrbot-plugin-helloworld
+# astrbot_plugin_jmcomic
 
-AstrBot 插件模板 / A template plugin for AstrBot plugin feature
+AstrBot plugin wrapper for `JMComic-Crawler-Python`.
 
-> [!NOTE]
-> This repo is just a template of [AstrBot](https://github.com/AstrBotDevs/AstrBot) Plugin.
-> 
-> [AstrBot](https://github.com/AstrBotDevs/AstrBot) is an agentic assistant for both personal and group conversations. It can be deployed across dozens of mainstream instant messaging platforms, including QQ, Telegram, Feishu, DingTalk, Slack, LINE, Discord, Matrix, etc. In addition, it provides a reliable and extensible conversational AI infrastructure for individuals, developers, and teams. Whether you need a personal AI companion, an intelligent customer support agent, an automation assistant, or an enterprise knowledge base, AstrBot enables you to quickly build AI applications directly within your existing messaging workflows.
+## Commands
 
-# Supports
+- `/jm <album_id>`: queue an album download.
+- `/jmp <photo_id>`: queue a single chapter/photo download.
+- `/jm_info <album_id>`: show album detail without downloading.
+- `/jm_search <keyword>`: search albums and show the first results.
+- `/jm_queue`: show recent tasks.
+- `/jm_cancel <task_id>`: cancel a queued task, or mark a running task as cancelled.
+- `/jm_clean`: remove old download/export outputs.
 
-- [AstrBot Repo](https://github.com/AstrBotDevs/AstrBot)
-- [AstrBot Plugin Development Docs (Chinese)](https://docs.astrbot.app/dev/star/plugin-new.html)
-- [AstrBot Plugin Development Docs (English)](https://docs.astrbot.app/en/dev/star/plugin-new.html)
+## Behavior
+
+Downloads run in background workers so AstrBot is not blocked. Finished outputs are zipped when `auto_zip` is enabled. The plugin tries to send the zip file if the current AstrBot adapter supports file messages; otherwise it returns the local path.
+
+## Config
+
+The plugin works with defaults. If your AstrBot environment exposes plugin config as a dict, these keys are supported:
+
+```yaml
+jmcomic:
+  enabled: true
+  admin_only: false
+  allow_group: true
+  download_dir: data/jmcomic/downloads
+  export_dir: data/jmcomic/exports
+  option_file: data/jmcomic/option.yml
+  client_impl: api
+  image_suffix:
+  decode_image: true
+  image_threads: 30
+  photo_threads:
+  auto_zip: true
+  send_file: true
+  send_detail_before_download: true
+  send_cover: true
+  max_concurrent_tasks: 1
+  max_search_results: 8
+  max_file_size_mb: 200
+  cleanup_days: 7
+```
+
+`option_file` is still a normal `jmcomic` option file. The plugin creates a minimal one on first start, then overrides the most common runtime fields from the AstrBot config.
