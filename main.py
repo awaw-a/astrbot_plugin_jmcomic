@@ -41,6 +41,76 @@ class JMComicPlugin(Star):
         if self.tasks is not None:
             await self.tasks.stop()
 
+    @filter.command("jm", priority=100)
+    async def jm_command(self, event: AstrMessageEvent):
+        """下载整本 JM album。"""
+        async for result in self.jm_download_album(event):
+            yield result
+        self._stop_event(event)
+
+    @filter.command("jmp", priority=100)
+    async def jmp_command(self, event: AstrMessageEvent):
+        """下载单个 JM 章节/photo。"""
+        async for result in self.jm_download_photo(event):
+            yield result
+        self._stop_event(event)
+
+    @filter.command("jm_info", priority=100)
+    async def jm_info_command(self, event: AstrMessageEvent):
+        """查看 JM album 详情。"""
+        async for result in self.jm_info(event):
+            yield result
+        self._stop_event(event)
+
+    @filter.command("jm_search", priority=100)
+    async def jm_search_command(self, event: AstrMessageEvent):
+        """搜索 JM album。"""
+        async for result in self.jm_search(event):
+            yield result
+        self._stop_event(event)
+
+    @filter.command("jm_queue", priority=100)
+    async def jm_queue_command(self, event: AstrMessageEvent):
+        """查看最近任务。"""
+        async for result in self.jm_queue(event):
+            yield result
+        self._stop_event(event)
+
+    @filter.command("jm_cancel", priority=100)
+    async def jm_cancel_command(self, event: AstrMessageEvent):
+        """取消 JM 下载任务。"""
+        async for result in self.jm_cancel(event):
+            yield result
+        self._stop_event(event)
+
+    @filter.command("jm_clean", priority=100)
+    async def jm_clean_command(self, event: AstrMessageEvent):
+        """清理过期的 JM 文件。"""
+        async for result in self.jm_clean(event):
+            yield result
+        self._stop_event(event)
+
+    @filter.command("jm_files", priority=100)
+    async def jm_files_command(self, event: AstrMessageEvent):
+        """查看当前保存的 JM 文件。"""
+        async for result in self.jm_files(event):
+            yield result
+        self._stop_event(event)
+
+    @filter.command("jm_test_push", priority=100)
+    async def jm_test_push_command(self, event: AstrMessageEvent):
+        """测试主动推送。"""
+        async for result in self.jm_test_push(event):
+            yield result
+        self._stop_event(event)
+
+    @filter.command("jm_help", priority=100)
+    async def jm_help_command(self, event: AstrMessageEvent):
+        """查看 JMComic 插件帮助。"""
+        async for result in self.jm_help(event):
+            yield result
+        self._stop_event(event)
+
     @filter.event_message_type(filter.EventMessageType.ALL)
     async def on_jm_message(self, event: AstrMessageEvent):
         """手动解析 JM 指令，确保参数错误时也能反馈。"""
@@ -60,9 +130,7 @@ class JMComicPlugin(Star):
         if command not in known_commands:
             if command.startswith("jm"):
                 yield event.plain_result(f"未知的 JM 指令：/{command}\n请使用 /jm_help 查看所有可用指令。")
-                stop = getattr(event, "stop_event", None)
-                if callable(stop):
-                    stop()
+                self._stop_event(event)
             return
 
         if command == "jm":
@@ -96,9 +164,7 @@ class JMComicPlugin(Star):
             async for result in self.jm_help(event):
                 yield result
 
-        stop = getattr(event, "stop_event", None)
-        if callable(stop):
-            stop()
+        self._stop_event(event)
 
     async def jm_download_album(self, event: AstrMessageEvent):
         """下载整本 JM album。"""
@@ -365,6 +431,12 @@ class JMComicPlugin(Star):
         if self.config.admin_only and not self._is_admin_event(event):
             return "当前配置仅允许管理员使用 JM 下载指令。"
         return None
+
+    @staticmethod
+    def _stop_event(event: AstrMessageEvent):
+        stop = getattr(event, "stop_event", None)
+        if callable(stop):
+            stop()
 
     @staticmethod
     def _command_name(event: AstrMessageEvent) -> str:
