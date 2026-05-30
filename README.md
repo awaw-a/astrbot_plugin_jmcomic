@@ -23,6 +23,9 @@
 - `/jm_clean`：清理过期的下载和导出文件。
 - `/jm_files [显示数量]`：查看当前系统保存的下载和导出文件。
 - `/jm_test_push`：测试当前会话是否支持下载完成后的主动推送。
+- `/jm_help`：查看所有可用指令。
+
+如果输入了未知的 `/jm...` 指令，bot 会提示使用 `/jm_help` 查看帮助。
 
 ## 配置
 
@@ -44,6 +47,7 @@ jmcomic:
   image_threads: 30
   photo_threads:
   auto_zip: true
+  delete_source_after_zip: false
   send_file: true
   send_detail_before_download: true
   send_cover: true
@@ -56,6 +60,8 @@ jmcomic:
 `option_file` 仍然是标准的 `jmcomic` 配置文件。插件首次启动时会自动创建一份最小可用配置，并在运行时用 AstrBot 插件配置覆盖常用字段，例如下载目录、客户端类型、并发数、图片后缀等。
 
 默认保存规则会以 album_id 作为目录名，导出的 zip 也会命名为 `{album_id}.zip`。例如 `JM123456` 会保存到 `downloads/123456/`，导出为 `exports/123456.zip`。
+
+如果开启 `delete_source_after_zip`，zip 成功生成后会删除 `downloads/{album_id}/`，只保留 `exports/{album_id}.zip`。
 
 ## 依赖
 

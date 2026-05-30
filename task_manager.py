@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import inspect
+import shutil
 from pathlib import Path
 from time import time
 from typing import Any, Optional
@@ -140,6 +141,8 @@ class TaskManager:
                 archive = self.config.export_dir / f"{task.output_dir.name}.zip"
                 task.archive_path = await asyncio.to_thread(zip_directory, task.output_dir, archive)
                 send_path = task.archive_path
+                if self.config.delete_source_after_zip and task.output_dir.exists():
+                    await asyncio.to_thread(shutil.rmtree, task.output_dir)
 
             task.status = "sending"
             await self._send_result(event, task, send_path)

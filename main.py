@@ -45,7 +45,24 @@ class JMComicPlugin(Star):
     async def on_jm_message(self, event: AstrMessageEvent):
         """手动解析 JM 指令，确保参数错误时也能反馈。"""
         command = self._command_name(event)
-        if command not in {"jm", "jmp", "jm_info", "jm_search", "jm_queue", "jm_cancel", "jm_clean", "jm_files", "jm_test_push"}:
+        known_commands = {
+            "jm",
+            "jmp",
+            "jm_info",
+            "jm_search",
+            "jm_queue",
+            "jm_cancel",
+            "jm_clean",
+            "jm_files",
+            "jm_test_push",
+            "jm_help",
+        }
+        if command not in known_commands:
+            if command.startswith("jm"):
+                yield event.plain_result(f"未知的 JM 指令：/{command}\n请使用 /jm_help 查看所有可用指令。")
+                stop = getattr(event, "stop_event", None)
+                if callable(stop):
+                    stop()
             return
 
         if command == "jm":
@@ -74,6 +91,9 @@ class JMComicPlugin(Star):
                 yield result
         elif command == "jm_test_push":
             async for result in self.jm_test_push(event):
+                yield result
+        elif command == "jm_help":
+            async for result in self.jm_help(event):
                 yield result
 
         stop = getattr(event, "stop_event", None)
@@ -107,7 +127,7 @@ class JMComicPlugin(Star):
             yield event.plain_result(f"已加入下载队列：{task.label}，任务ID：{task.task_id}。后续状态会主动推送，也可使用 /jm_queue 查询。")
         except Exception as exc:
             logger.error("jm command failed: %s", exc, exc_info=exc)
-            yield event.plain_result(f"JM 请求失败：{exc}")
+            yield event.plain_result(f"JM 请求失败：{exc}\n请使用 /jm_help 查看指令用法。")
 
     async def jm_download_photo(self, event: AstrMessageEvent):
         """下载单个 JM 章节/photo。"""
@@ -133,7 +153,7 @@ class JMComicPlugin(Star):
             yield event.plain_result(f"已加入下载队列：{task.label}，任务ID：{task.task_id}。后续状态会主动推送，也可使用 /jm_queue 查询。")
         except Exception as exc:
             logger.error("jmp command failed: %s", exc, exc_info=exc)
-            yield event.plain_result(f"JM 请求失败：{exc}")
+            yield event.plain_result(f"JM 请求失败：{exc}\n请使用 /jm_help 查看指令用法。")
 
     async def jm_info(self, event: AstrMessageEvent):
         """查看 JM album 详情，不下载。"""
@@ -154,7 +174,7 @@ class JMComicPlugin(Star):
             yield event.plain_result(self.adapter.format_album_info(album))  # type: ignore[union-attr]
         except Exception as exc:
             logger.error("jm_info command failed: %s", exc, exc_info=exc)
-            yield event.plain_result(f"JM 详情获取失败：{exc}")
+            yield event.plain_result(f"JM 详情获取失败：{exc}\n请使用 /jm_help 查看指令用法。")
 
     async def jm_search(self, event: AstrMessageEvent):
         """搜索 JM album。"""
@@ -184,7 +204,7 @@ class JMComicPlugin(Star):
             yield event.plain_result("\n".join(lines))
         except Exception as exc:
             logger.error("jm_search command failed: %s", exc, exc_info=exc)
-            yield event.plain_result(f"JM 搜索失败：{exc}")
+            yield event.plain_result(f"JM 搜索失败：{exc}\n请使用 /jm_help 查看指令用法。")
 
     async def jm_queue(self, event: AstrMessageEvent):
         """查看最近的 JM 下载任务。"""
@@ -298,6 +318,26 @@ class JMComicPlugin(Star):
             await self.context.send_message(origin, chain)
         except Exception as exc:
             logger.error("jm_test_push failed: %s", exc, exc_info=exc)
+
+    async def jm_help(self, event: AstrMessageEvent):
+        """查看 JMComic 插件帮助。"""
+        yield event.plain_result(
+            "\n".join(
+                [
+                    "JMComic 插件可用指令：",
+                    "/jm <album_id> - 下载整本 album",
+                    "/jmp <photo_id> - 下载单个章节/photo",
+                    "/jm_info <album_id> - 查看 album 详情，不下载",
+                    "/jm_search <关键词> - 搜索 album",
+                    "/jm_queue - 查看最近任务",
+                    "/jm_cancel <任务ID> - 取消任务",
+                    "/jm_files [显示数量] - 查看当前保存的下载和导出文件",
+                    "/jm_clean - 清理过期下载和导出文件",
+                    "/jm_test_push - 测试当前会话是否支持主动推送",
+                    "/jm_help - 查看本帮助",
+                ]
+            )
+        )
 
     def _require_ready(self) -> Optional[str]:
         if self.config is None or self.adapter is None or self.tasks is None:

@@ -23,6 +23,7 @@ class PluginConfig:
     photo_threads: Optional[int] = None
 
     auto_zip: bool = True
+    delete_source_after_zip: bool = False
     send_file: bool = True
     send_detail_before_download: bool = True
     send_cover: bool = True

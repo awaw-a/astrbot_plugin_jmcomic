@@ -73,6 +73,12 @@
     "hint": "开启后会把下载结果打包成 zip。",
     "default": true
   },
+  "delete_source_after_zip": {
+    "description": "压缩后删除原始目录",
+    "type": "bool",
+    "hint": "开启后，zip 成功生成后会删除 downloads 下对应的原始下载目录，只保留 exports 下的 zip。",
+    "default": false
+  },
   "send_file": {
     "description": "尝试发送文件",
     "type": "bool",
