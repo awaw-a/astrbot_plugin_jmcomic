@@ -9,12 +9,12 @@ from typing import Any, Optional
 from astrbot.api import logger
 
 try:
-    from .file_utils import cleanup_old_files, is_too_large, path_size, size_mb, zip_directory
+    from .file_utils import cleanup_old_files, is_too_large, newest_child_dir, path_size, size_mb, zip_directory
     from .jm_adapter import JmcomicAdapter
     from .models import JmTask
     from .plugin_config import PluginConfig
 except ImportError:
-    from file_utils import cleanup_old_files, is_too_large, path_size, size_mb, zip_directory
+    from file_utils import cleanup_old_files, is_too_large, newest_child_dir, path_size, size_mb, zip_directory
     from jm_adapter import JmcomicAdapter
     from models import JmTask
     from plugin_config import PluginConfig
@@ -55,7 +55,7 @@ class TaskManager:
             session_id=session_id,
             unified_msg_origin=str(getattr(event, "unified_msg_origin", "") or ""),
         )
-        task.output_dir = self.config.download_dir / task.task_id
+        task.output_dir = self.config.download_dir / task.jm_id
         self.tasks[task.task_id] = task
         await self.queue.put((task, event))
         return task
@@ -114,9 +114,14 @@ class TaskManager:
 
         try:
             if task.kind == "album":
-                await asyncio.to_thread(self.adapter.download_album, task.jm_id, task.output_dir)
+                await asyncio.to_thread(self.adapter.download_album, task.jm_id, self.config.download_dir)
             else:
-                await asyncio.to_thread(self.adapter.download_photo, task.jm_id, task.output_dir)
+                await asyncio.to_thread(self.adapter.download_photo, task.jm_id, self.config.download_dir)
+
+            if not task.output_dir.exists() or not any(task.output_dir.iterdir()):
+                fallback_dir = newest_child_dir(self.config.download_dir)
+                if fallback_dir is not None:
+                    task.output_dir = fallback_dir
 
             if task.task_id in self.cancelled:
                 task.status = "cancelled"
@@ -132,7 +137,7 @@ class TaskManager:
             send_path = task.output_dir
             if self.config.auto_zip:
                 task.status = "packing"
-                archive = self.config.export_dir / f"{task.label}_{task.task_id}.zip"
+                archive = self.config.export_dir / f"{task.output_dir.name}.zip"
                 task.archive_path = await asyncio.to_thread(zip_directory, task.output_dir, archive)
                 send_path = task.archive_path
 
@@ -204,7 +209,7 @@ async def _maybe_await(value: Any) -> Any:
 
 
 async def _emit_text(context: Any, event: Any, origin: str, text: str) -> bool:
-    if await _send_by_context(context, origin, [_plain_component(text)]):
+    if await _send_by_context(context, origin, _build_text_chain(text)):
         return True
 
     for name in ("send", "reply", "send_message"):
@@ -230,7 +235,7 @@ async def _emit_file(context: Any, event: Any, origin: str, path: Path) -> bool:
     except Exception:
         return False
 
-    if await _send_by_context(context, origin, [payload]):
+    if await _send_by_context(context, origin, _build_component_chain([payload])):
         return True
 
     for name in ("send", "reply", "send_message"):
@@ -248,6 +253,30 @@ async def _emit_file(context: Any, event: Any, origin: str, path: Path) -> bool:
     return False
 
 
+def _build_text_chain(text: str) -> Any:
+    try:
+        from astrbot.api.event import MessageChain
+
+        return MessageChain().message(text)
+    except Exception:
+        return [_plain_component(text)]
+
+
+def _build_component_chain(components: list[Any]) -> Any:
+    try:
+        from astrbot.api.event import MessageChain
+
+        chain = MessageChain()
+        if hasattr(chain, "chain"):
+            chain.chain.extend(components)
+        else:
+            for component in components:
+                chain.append(component)
+        return chain
+    except Exception:
+        return components
+
+
 def _plain_component(text: str) -> Any:
     try:
         from astrbot.api import message_components as comp
@@ -257,7 +286,7 @@ def _plain_component(text: str) -> Any:
         return text
 
 
-async def _send_by_context(context: Any, origin: str, chain: list[Any]) -> bool:
+async def _send_by_context(context: Any, origin: str, chain: Any) -> bool:
     if not context or not origin:
         return False
     method = getattr(context, "send_message", None)

@@ -113,6 +113,6 @@
     "description": "清理保留天数",
     "type": "int",
     "hint": "/jm_clean 会删除早于这个天数的下载和导出文件。填 0 表示不清理。",
-    "default": 7
+    "default": 1
   }
 }

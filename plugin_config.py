@@ -30,7 +30,7 @@ class PluginConfig:
     max_concurrent_tasks: int = 1
     max_search_results: int = 8
     max_file_size_mb: int = 200
-    cleanup_days: int = 7
+    cleanup_days: int = 1
 
     @classmethod
     def load(cls, context: Any = None, base_dir: Optional[Path] = None) -> "PluginConfig":
@@ -110,7 +110,7 @@ class PluginConfig:
             "log: true\n\n"
             "dir_rule:\n"
             f"  base_dir: {base_dir}\n"
-            "  rule: Bd_Aauthor_Atitle_Pindex\n\n"
+            "  rule: Bd_Aid\n\n"
             "download:\n"
             "  cache: true\n"
             "  image:\n"

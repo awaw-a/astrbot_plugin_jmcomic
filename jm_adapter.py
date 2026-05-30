@@ -40,6 +40,7 @@ class JmcomicAdapter:
             option.dir_rule.base_dir = str(base_dir)
         else:
             option.dir_rule.base_dir = str(self.config.download_dir)
+        option.dir_rule = self.jmcomic.DirRule("Bd_Aid", base_dir=option.dir_rule.base_dir)
 
         option.client.impl = self.config.client_impl
         option.download.image.decode = self.config.decode_image

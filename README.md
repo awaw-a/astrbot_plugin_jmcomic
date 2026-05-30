@@ -21,6 +21,8 @@
 - `/jm_queue`：查看最近的下载任务。
 - `/jm_cancel <任务ID>`：取消排队中的任务，或标记运行中的任务为取消。
 - `/jm_clean`：清理过期的下载和导出文件。
+- `/jm_files [显示数量]`：查看当前系统保存的下载和导出文件。
+- `/jm_test_push`：测试当前会话是否支持下载完成后的主动推送。
 
 ## 配置
 
@@ -48,10 +50,12 @@ jmcomic:
   max_concurrent_tasks: 1
   max_search_results: 8
   max_file_size_mb: 200
-  cleanup_days: 7
+  cleanup_days: 1
 ```
 
 `option_file` 仍然是标准的 `jmcomic` 配置文件。插件首次启动时会自动创建一份最小可用配置，并在运行时用 AstrBot 插件配置覆盖常用字段，例如下载目录、客户端类型、并发数、图片后缀等。
+
+默认保存规则会以 album_id 作为目录名，导出的 zip 也会命名为 `{album_id}.zip`。例如 `JM123456` 会保存到 `downloads/123456/`，导出为 `exports/123456.zip`。
 
 ## 依赖
 
