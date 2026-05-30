@@ -1,0 +1,118 @@
+{
+  "enabled": {
+    "description": "启用插件",
+    "type": "bool",
+    "hint": "关闭后所有 JMComic 指令都会返回禁用提示。",
+    "default": true
+  },
+  "admin_only": {
+    "description": "仅管理员可用",
+    "type": "bool",
+    "hint": "开启后，只有 AstrBot 判断为管理员/所有者的用户可以使用下载和清理指令。",
+    "default": false
+  },
+  "allow_group": {
+    "description": "允许群聊使用",
+    "type": "bool",
+    "hint": "关闭后，群聊中的下载指令会被拒绝。",
+    "default": true
+  },
+  "download_dir": {
+    "description": "下载目录",
+    "type": "string",
+    "hint": "保存原始下载内容的目录。相对路径会基于插件目录解析。",
+    "default": "data/jmcomic/downloads"
+  },
+  "export_dir": {
+    "description": "导出目录",
+    "type": "string",
+    "hint": "保存 zip 等导出文件的目录。相对路径会基于插件目录解析。",
+    "default": "data/jmcomic/exports"
+  },
+  "option_file": {
+    "description": "jmcomic 配置文件",
+    "type": "string",
+    "hint": "标准 jmcomic option.yml 路径。不存在时插件会自动创建一份最小配置。",
+    "default": "data/jmcomic/option.yml"
+  },
+  "client_impl": {
+    "description": "客户端实现",
+    "type": "string",
+    "hint": "api 通常兼容性更好；html 使用网页端。",
+    "options": ["api", "html"],
+    "labels": ["移动端 API", "网页端 HTML"],
+    "default": "api"
+  },
+  "image_suffix": {
+    "description": "图片后缀",
+    "type": "string",
+    "hint": "留空表示使用原图后缀；可填 .jpg、.png、.webp。",
+    "default": ""
+  },
+  "decode_image": {
+    "description": "解码图片",
+    "type": "bool",
+    "hint": "开启后会保存解码后的图片。",
+    "default": true
+  },
+  "image_threads": {
+    "description": "图片下载并发数",
+    "type": "int",
+    "hint": "单章节内图片下载的并发数。",
+    "default": 30
+  },
+  "photo_threads": {
+    "description": "章节下载并发数",
+    "type": "int",
+    "hint": "整本下载时章节级并发数。填 0 表示使用系统 CPU 核心数。",
+    "default": 0
+  },
+  "auto_zip": {
+    "description": "完成后自动压缩",
+    "type": "bool",
+    "hint": "开启后会把下载结果打包成 zip。",
+    "default": true
+  },
+  "send_file": {
+    "description": "尝试发送文件",
+    "type": "bool",
+    "hint": "如果当前消息平台支持文件消息，会尝试发送 zip 文件；否则返回本地路径。",
+    "default": true
+  },
+  "send_detail_before_download": {
+    "description": "下载前发送详情",
+    "type": "bool",
+    "hint": "使用 /jm 下载整本前，先发送标题、作者、页数等信息。",
+    "default": true
+  },
+  "send_cover": {
+    "description": "详情中显示封面链接",
+    "type": "bool",
+    "hint": "开启后 /jm_info 和下载前详情会包含封面 URL。",
+    "default": true
+  },
+  "max_concurrent_tasks": {
+    "description": "最大并发任务数",
+    "type": "int",
+    "hint": "后台 worker 数量。建议从 1 开始，避免占用过多网络和磁盘资源。",
+    "default": 1
+  },
+  "max_search_results": {
+    "description": "搜索结果数量",
+    "type": "int",
+    "hint": "/jm_search 返回的最大条数。",
+    "default": 8
+  },
+  "max_file_size_mb": {
+    "description": "发送文件大小上限 MB",
+    "type": "int",
+    "hint": "导出文件超过此大小时不尝试发送，只返回本地路径。",
+    "default": 200
+  },
+  "cleanup_days": {
+    "description": "清理保留天数",
+    "type": "int",
+    "hint": "/jm_clean 会删除早于这个天数的下载和导出文件。填 0 表示不清理。",
+    "default": 7
+  }
+}

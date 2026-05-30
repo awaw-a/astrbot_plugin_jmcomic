@@ -20,15 +20,16 @@ except ImportError:
 
 @register("astrbot_plugin_jmcomic", "Codex", "基于 JMComic-Crawler-Python 的 JMComic 下载插件", "1.0.0")
 class JMComicPlugin(Star):
-    def __init__(self, context: Context):
+    def __init__(self, context: Context, config=None):
         super().__init__(context)
         self.root_dir = Path(__file__).resolve().parent
+        self.astrbot_config = config
         self.config: Optional[PluginConfig] = None
         self.adapter: Optional[JmcomicAdapter] = None
         self.tasks: Optional[TaskManager] = None
 
     async def initialize(self):
-        self.config = PluginConfig.load(self.context, self.root_dir)
+        self.config = PluginConfig.load(self.astrbot_config or self.context, self.root_dir)
         self.adapter = JmcomicAdapter(self.config, self.root_dir)
         self.tasks = TaskManager(self.config, self.adapter, self.context)
         await self.tasks.start()

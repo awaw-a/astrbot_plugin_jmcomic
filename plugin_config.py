@@ -52,6 +52,12 @@ class PluginConfig:
         cfg.max_concurrent_tasks = max(1, int(cfg.max_concurrent_tasks))
         cfg.max_search_results = max(1, int(cfg.max_search_results))
         cfg.max_file_size_mb = max(1, int(cfg.max_file_size_mb))
+        cfg.image_threads = max(1, int(cfg.image_threads))
+        cfg.cleanup_days = max(0, int(cfg.cleanup_days))
+        cfg.photo_threads = None if cfg.photo_threads in (None, "", 0, "0") else max(1, int(cfg.photo_threads))
+        cfg.image_suffix = str(cfg.image_suffix).strip() if cfg.image_suffix is not None else None
+        if cfg.image_suffix == "":
+            cfg.image_suffix = None
         cfg.ensure_dirs()
         cfg.ensure_option_file()
         return cfg
@@ -60,6 +66,8 @@ class PluginConfig:
     def _read_context_config(context: Any) -> dict:
         if context is None:
             return {}
+        if isinstance(context, dict):
+            return _pick_config_section(context)
 
         for attr in ("get_config", "get_plugin_config"):
             getter = getattr(context, attr, None)
