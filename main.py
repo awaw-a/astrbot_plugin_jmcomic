@@ -321,6 +321,16 @@ class JMComicPlugin(Star):
 
     async def jm_help(self, event: AstrMessageEvent):
         """查看 JMComic 插件帮助。"""
+        ready = self._require_ready()
+        if ready is not None:
+            yield event.plain_result(ready)
+            return
+
+        if self.config.zip_password_enabled:  # type: ignore[union-attr]
+            password_text = f"当前压缩包密码：{self.config.zip_password}"  # type: ignore[union-attr]
+        else:
+            password_text = "当前压缩包密码：未启用"
+
         yield event.plain_result(
             "\n".join(
                 [
@@ -335,6 +345,8 @@ class JMComicPlugin(Star):
                     "/jm_clean - 清理过期下载和导出文件",
                     "/jm_test_push - 测试当前会话是否支持主动推送",
                     "/jm_help - 查看本帮助",
+                    "",
+                    password_text,
                 ]
             )
         )
