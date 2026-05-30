@@ -44,3 +44,9 @@ jmcomic:
 ```
 
 `option_file` is still a normal `jmcomic` option file. The plugin creates a minimal one on first start, then overrides the most common runtime fields from the AstrBot config.
+
+## License
+
+This AstrBot plugin repository is licensed under the root `LICENSE`.
+
+`JMComic-Crawler-Python/` is vendored third-party source code from `https://github.com/hect0x7/JMComic-Crawler-Python` and retains its upstream MIT License. See `THIRD_PARTY_NOTICES.md` and `JMComic-Crawler-Python/LICENSE`.
