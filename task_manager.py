@@ -8,10 +8,16 @@ from typing import Any, Optional
 
 from astrbot.api import logger
 
-from file_utils import cleanup_old_files, is_too_large, path_size, size_mb, zip_directory
-from jm_adapter import JmcomicAdapter
-from models import JmTask
-from plugin_config import PluginConfig
+try:
+    from .file_utils import cleanup_old_files, is_too_large, path_size, size_mb, zip_directory
+    from .jm_adapter import JmcomicAdapter
+    from .models import JmTask
+    from .plugin_config import PluginConfig
+except ImportError:
+    from file_utils import cleanup_old_files, is_too_large, path_size, size_mb, zip_directory
+    from jm_adapter import JmcomicAdapter
+    from models import JmTask
+    from plugin_config import PluginConfig
 
 
 class TaskManager:
@@ -67,10 +73,10 @@ class TaskManager:
 
     def format_queue(self) -> str:
         if not self.tasks:
-            return "No JM tasks."
+            return "暂无 JM 任务。"
 
         recent = sorted(self.tasks.values(), key=lambda item: item.created_at, reverse=True)[:12]
-        lines = ["Recent JM tasks:"]
+        lines = ["最近的 JM 任务："]
         for task in recent:
             extra = ""
             if task.status == "done":
@@ -98,13 +104,13 @@ class TaskManager:
 
     async def _run_task(self, task: JmTask, event: Any) -> None:
         if task.status == "cancelled":
-            await _emit_text(self.context, event, task.unified_msg_origin, f"Task {task.task_id} was cancelled before start.")
+            await _emit_text(self.context, event, task.unified_msg_origin, f"任务 {task.task_id} 已在开始前取消。")
             return
 
         task.status = "running"
         task.started_at = time()
         task.output_dir.mkdir(parents=True, exist_ok=True)
-        await _emit_text(self.context, event, task.unified_msg_origin, f"Started {task.label}. Task: {task.task_id}")
+        await _emit_text(self.context, event, task.unified_msg_origin, f"开始下载 {task.label}，任务ID：{task.task_id}")
 
         try:
             if task.kind == "album":
@@ -119,7 +125,7 @@ class TaskManager:
                     self.context,
                     event,
                     task.unified_msg_origin,
-                    f"Task {task.task_id} finished downloading but was marked cancelled.",
+                    f"任务 {task.task_id} 已完成下载，但此前已被标记为取消，因此不继续发送结果。",
                 )
                 return
 
@@ -139,7 +145,7 @@ class TaskManager:
             task.error = str(exc)
             task.finished_at = time()
             logger.error("JM task %s failed: %s", task.task_id, exc, exc_info=exc)
-            await _emit_text(self.context, event, task.unified_msg_origin, f"Task {task.task_id} failed: {exc}")
+            await _emit_text(self.context, event, task.unified_msg_origin, f"任务 {task.task_id} 失败：{exc}")
 
     async def _send_result(self, event: Any, task: JmTask, send_path: Path) -> None:
         size = path_size(send_path)
@@ -148,8 +154,8 @@ class TaskManager:
                 self.context,
                 event,
                 task.unified_msg_origin,
-                f"Task {task.task_id} done, but output is {size_mb(size)} MB "
-                f"(limit {self.config.max_file_size_mb} MB).\nPath: {send_path}",
+                f"任务 {task.task_id} 已完成，但输出文件大小为 {size_mb(size)} MB，"
+                f"超过限制 {self.config.max_file_size_mb} MB。\n路径：{send_path}",
             )
             return
 
@@ -160,7 +166,7 @@ class TaskManager:
                     self.context,
                     event,
                     task.unified_msg_origin,
-                    f"Task {task.task_id} done. Size: {size_mb(size)} MB",
+                    f"任务 {task.task_id} 已完成，文件大小：{size_mb(size)} MB",
                 )
                 return
 
@@ -168,7 +174,7 @@ class TaskManager:
             self.context,
             event,
             task.unified_msg_origin,
-            f"Task {task.task_id} done. Size: {size_mb(size)} MB\nPath: {send_path}",
+            f"任务 {task.task_id} 已完成，文件大小：{size_mb(size)} MB\n路径：{send_path}",
         )
 
 

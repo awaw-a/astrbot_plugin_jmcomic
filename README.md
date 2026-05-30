@@ -1,24 +1,30 @@
 # astrbot_plugin_jmcomic
 
-AstrBot plugin wrapper for `JMComic-Crawler-Python`.
+这是一个基于 `JMComic-Crawler-Python` 的 AstrBot 插件，支持在聊天中查询、搜索和下载 JMComic 内容，并提供后台队列、自动压缩、文件大小限制和旧文件清理。
 
-## Commands
+## 功能
 
-- `/jm <album_id>`: queue an album download.
-- `/jmp <photo_id>`: queue a single chapter/photo download.
-- `/jm_info <album_id>`: show album detail without downloading.
-- `/jm_search <keyword>`: search albums and show the first results.
-- `/jm_queue`: show recent tasks.
-- `/jm_cancel <task_id>`: cancel a queued task, or mark a running task as cancelled.
-- `/jm_clean`: remove old download/export outputs.
+- 后台下载，不阻塞 AstrBot 主事件循环。
+- 支持下载整本 album 或单个章节/photo。
+- 支持查询本子详情和搜索本子。
+- 支持下载完成后自动打包为 zip。
+- 支持文件发送；如果当前平台不支持文件消息，会回退为返回本地文件路径。
+- 支持任务队列、任务取消和旧文件清理。
+- 内置 `JMComic-Crawler-Python`，无需额外拉取子仓库。
 
-## Behavior
+## 指令
 
-Downloads run in background workers so AstrBot is not blocked. Finished outputs are zipped when `auto_zip` is enabled. The plugin tries to send the zip file if the current AstrBot adapter supports file messages; otherwise it returns the local path.
+- `/jm <album_id>`：加入整本下载任务。
+- `/jmp <photo_id>`：加入单章节下载任务。
+- `/jm_info <album_id>`：只查看本子详情，不下载。
+- `/jm_search <关键词>`：搜索本子并返回前几条结果。
+- `/jm_queue`：查看最近的下载任务。
+- `/jm_cancel <任务ID>`：取消排队中的任务，或标记运行中的任务为取消。
+- `/jm_clean`：清理过期的下载和导出文件。
 
-## Config
+## 配置
 
-The plugin works with defaults. If your AstrBot environment exposes plugin config as a dict, these keys are supported:
+插件可以直接使用默认配置。若你的 AstrBot 环境支持插件配置字典，可使用以下字段：
 
 ```yaml
 jmcomic:
@@ -43,10 +49,18 @@ jmcomic:
   cleanup_days: 7
 ```
 
-`option_file` is still a normal `jmcomic` option file. The plugin creates a minimal one on first start, then overrides the most common runtime fields from the AstrBot config.
+`option_file` 仍然是标准的 `jmcomic` 配置文件。插件首次启动时会自动创建一份最小可用配置，并在运行时用 AstrBot 插件配置覆盖常用字段，例如下载目录、客户端类型、并发数、图片后缀等。
 
-## License
+## 依赖
 
-This AstrBot plugin repository is licensed under the root `LICENSE`.
+插件依赖已写入 `requirements.txt`。如果 AstrBot 没有自动安装依赖，可在插件目录执行：
 
-`JMComic-Crawler-Python/` is vendored third-party source code from `https://github.com/hect0x7/JMComic-Crawler-Python` and retains its upstream MIT License. See `THIRD_PARTY_NOTICES.md` and `JMComic-Crawler-Python/LICENSE`.
+```bash
+python -m pip install -r requirements.txt
+```
+
+## 许可说明
+
+本 AstrBot 插件主体遵循根目录 `LICENSE`。
+
+`JMComic-Crawler-Python/` 是内置的第三方源码，来源于 `https://github.com/hect0x7/JMComic-Crawler-Python`，保留其上游 MIT License。详见 `THIRD_PARTY_NOTICES.md` 和 `JMComic-Crawler-Python/LICENSE`。

@@ -4,8 +4,12 @@ import sys
 from pathlib import Path
 from typing import Any, Optional
 
-from models import SearchItem
-from plugin_config import PluginConfig
+try:
+    from .models import SearchItem
+    from .plugin_config import PluginConfig
+except ImportError:
+    from models import SearchItem
+    from plugin_config import PluginConfig
 
 
 class JmcomicAdapter:

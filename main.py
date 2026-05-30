@@ -8,12 +8,17 @@ from astrbot.api import logger
 from astrbot.api.event import AstrMessageEvent, filter
 from astrbot.api.star import Context, Star, register
 
-from jm_adapter import JmcomicAdapter
-from plugin_config import PluginConfig
-from task_manager import TaskManager
+try:
+    from .jm_adapter import JmcomicAdapter
+    from .plugin_config import PluginConfig
+    from .task_manager import TaskManager
+except ImportError:
+    from jm_adapter import JmcomicAdapter
+    from plugin_config import PluginConfig
+    from task_manager import TaskManager
 
 
-@register("astrbot_plugin_jmcomic", "Codex", "JMComic downloader powered by JMComic-Crawler-Python", "1.0.0")
+@register("astrbot_plugin_jmcomic", "Codex", "基于 JMComic-Crawler-Python 的 JMComic 下载插件", "1.0.0")
 class JMComicPlugin(Star):
     def __init__(self, context: Context):
         super().__init__(context)
@@ -35,7 +40,7 @@ class JMComicPlugin(Star):
 
     @filter.command("jm")
     async def jm_download_album(self, event: AstrMessageEvent):
-        """Download a JM album."""
+        """下载整本 JM album。"""
         ready = self._require_ready()
         if ready is not None:
             yield event.plain_result(ready)
@@ -48,7 +53,7 @@ class JMComicPlugin(Star):
 
         raw = self._arg_text(event, "jm")
         if not raw:
-            yield event.plain_result("Usage: /jm <album_id>")
+            yield event.plain_result("用法：/jm <album_id>")
             return
 
         try:
@@ -57,14 +62,14 @@ class JMComicPlugin(Star):
                 album = await asyncio.to_thread(self.adapter.get_album_info, jm_id)  # type: ignore[union-attr]
                 yield event.plain_result(self.adapter.format_album_info(album))  # type: ignore[union-attr]
             task = await self.tasks.submit("album", jm_id, event)  # type: ignore[union-attr]
-            yield event.plain_result(f"Queued {task.label}. Task: {task.task_id}")
+            yield event.plain_result(f"已加入下载队列：{task.label}，任务ID：{task.task_id}")
         except Exception as exc:
             logger.error("jm command failed: %s", exc, exc_info=exc)
-            yield event.plain_result(f"JM request failed: {exc}")
+            yield event.plain_result(f"JM 请求失败：{exc}")
 
     @filter.command("jmp")
     async def jm_download_photo(self, event: AstrMessageEvent):
-        """Download a JM photo/chapter."""
+        """下载单个 JM 章节/photo。"""
         ready = self._require_ready()
         if ready is not None:
             yield event.plain_result(ready)
@@ -77,20 +82,20 @@ class JMComicPlugin(Star):
 
         raw = self._arg_text(event, "jmp")
         if not raw:
-            yield event.plain_result("Usage: /jmp <photo_id>")
+            yield event.plain_result("用法：/jmp <photo_id>")
             return
 
         try:
             jm_id = self.adapter.parse_jm_id(raw)  # type: ignore[union-attr]
             task = await self.tasks.submit("photo", jm_id, event)  # type: ignore[union-attr]
-            yield event.plain_result(f"Queued {task.label}. Task: {task.task_id}")
+            yield event.plain_result(f"已加入下载队列：{task.label}，任务ID：{task.task_id}")
         except Exception as exc:
             logger.error("jmp command failed: %s", exc, exc_info=exc)
-            yield event.plain_result(f"JM request failed: {exc}")
+            yield event.plain_result(f"JM 请求失败：{exc}")
 
     @filter.command("jm_info")
     async def jm_info(self, event: AstrMessageEvent):
-        """Show JM album detail without downloading."""
+        """查看 JM album 详情，不下载。"""
         ready = self._require_ready()
         if ready is not None:
             yield event.plain_result(ready)
@@ -98,7 +103,7 @@ class JMComicPlugin(Star):
 
         raw = self._arg_text(event, "jm_info")
         if not raw:
-            yield event.plain_result("Usage: /jm_info <album_id>")
+            yield event.plain_result("用法：/jm_info <album_id>")
             return
 
         try:
@@ -107,11 +112,11 @@ class JMComicPlugin(Star):
             yield event.plain_result(self.adapter.format_album_info(album))  # type: ignore[union-attr]
         except Exception as exc:
             logger.error("jm_info command failed: %s", exc, exc_info=exc)
-            yield event.plain_result(f"JM info failed: {exc}")
+            yield event.plain_result(f"JM 详情获取失败：{exc}")
 
     @filter.command("jm_search")
     async def jm_search(self, event: AstrMessageEvent):
-        """Search JM albums."""
+        """搜索 JM album。"""
         ready = self._require_ready()
         if ready is not None:
             yield event.plain_result(ready)
@@ -119,17 +124,17 @@ class JMComicPlugin(Star):
 
         keyword = self._arg_text(event, "jm_search")
         if not keyword:
-            yield event.plain_result("Usage: /jm_search <keyword>")
+            yield event.plain_result("用法：/jm_search <关键词>")
             return
 
         try:
             limit = self.config.max_search_results  # type: ignore[union-attr]
             items = await asyncio.to_thread(self.adapter.search, keyword, limit)  # type: ignore[union-attr]
             if not items:
-                yield event.plain_result("No results.")
+                yield event.plain_result("没有搜索结果。")
                 return
 
-            lines = [f"Search results for: {keyword}"]
+            lines = [f"搜索结果：{keyword}"]
             for item in items:
                 tags = ", ".join(item.tags[:5])
                 suffix = f" [{tags}]" if tags else ""
@@ -137,11 +142,11 @@ class JMComicPlugin(Star):
             yield event.plain_result("\n".join(lines))
         except Exception as exc:
             logger.error("jm_search command failed: %s", exc, exc_info=exc)
-            yield event.plain_result(f"JM search failed: {exc}")
+            yield event.plain_result(f"JM 搜索失败：{exc}")
 
     @filter.command("jm_queue")
     async def jm_queue(self, event: AstrMessageEvent):
-        """Show recent JM tasks."""
+        """查看最近的 JM 下载任务。"""
         ready = self._require_ready()
         if ready is not None:
             yield event.plain_result(ready)
@@ -150,7 +155,7 @@ class JMComicPlugin(Star):
 
     @filter.command("jm_cancel")
     async def jm_cancel(self, event: AstrMessageEvent):
-        """Cancel a queued/running JM task."""
+        """取消 JM 下载任务。"""
         ready = self._require_ready()
         if ready is not None:
             yield event.plain_result(ready)
@@ -158,19 +163,19 @@ class JMComicPlugin(Star):
 
         task_id = self._arg_text(event, "jm_cancel").strip()
         if not task_id:
-            yield event.plain_result("Usage: /jm_cancel <task_id>")
+            yield event.plain_result("用法：/jm_cancel <任务ID>")
             return
         task = self.tasks.cancel(task_id)  # type: ignore[union-attr]
         if task is None:
-            yield event.plain_result(f"Task not found: {task_id}")
+            yield event.plain_result(f"未找到任务：{task_id}")
         elif task.status == "cancelled":
-            yield event.plain_result(f"Cancelled task {task.task_id}.")
+            yield event.plain_result(f"已取消任务：{task.task_id}")
         else:
-            yield event.plain_result(f"Task {task.task_id} will stop after the current download step.")
+            yield event.plain_result(f"任务 {task.task_id} 已标记取消，会在当前下载步骤结束后停止后续处理。")
 
     @filter.command("jm_clean")
     async def jm_clean(self, event: AstrMessageEvent):
-        """Clean old JM outputs."""
+        """清理过期的 JM 下载和导出文件。"""
         ready = self._require_ready()
         if ready is not None:
             yield event.plain_result(ready)
@@ -182,21 +187,21 @@ class JMComicPlugin(Star):
             return
 
         removed = self.tasks.cleanup()  # type: ignore[union-attr]
-        yield event.plain_result(f"Cleaned {removed} old JM output item(s).")
+        yield event.plain_result(f"已清理 {removed} 个过期 JM 输出项。")
 
     def _require_ready(self) -> Optional[str]:
         if self.config is None or self.adapter is None or self.tasks is None:
-            return "JMComic plugin is not initialized yet."
+            return "JMComic 插件尚未初始化完成。"
         if not self.config.enabled:
-            return "JMComic plugin is disabled."
+            return "JMComic 插件已禁用。"
         return None
 
     def _check_policy(self, event: AstrMessageEvent) -> Optional[str]:
         assert self.config is not None
         if not self.config.allow_group and self._is_group_event(event):
-            return "JM download is disabled in group chats."
+            return "当前配置不允许在群聊中使用 JM 下载。"
         if self.config.admin_only and not self._is_admin_event(event):
-            return "Only admins can use JM download commands."
+            return "当前配置仅允许管理员使用 JM 下载指令。"
         return None
 
     @staticmethod

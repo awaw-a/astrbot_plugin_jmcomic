@@ -1,19 +1,19 @@
-# Third-Party Notices
+# 第三方许可说明
 
-This repository vendors third-party source code under `JMComic-Crawler-Python/`.
+本仓库内置了第三方源码，路径为 `JMComic-Crawler-Python/`。
 
 ## JMComic-Crawler-Python
 
-- Upstream project: `https://github.com/hect0x7/JMComic-Crawler-Python`
-- Vendored path: `JMComic-Crawler-Python/`
-- Version in vendored package: `2.6.20`
-- License: MIT License
-- Copyright: Copyright (c) 2023 hect0x7
+- 上游项目：`https://github.com/hect0x7/JMComic-Crawler-Python`
+- 内置路径：`JMComic-Crawler-Python/`
+- 当前内置版本：`2.6.20`
+- 许可协议：MIT License
+- 版权声明：Copyright (c) 2023 hect0x7
 
-The upstream MIT license text is retained at:
+上游 MIT License 原文保留在：
 
 ```text
 JMComic-Crawler-Python/LICENSE
 ```
 
-The surrounding AstrBot plugin code in this repository is licensed under the repository root `LICENSE` unless a file states otherwise. The vendored `JMComic-Crawler-Python` files retain their original MIT license terms.
+除非文件另有说明，本仓库中的 AstrBot 插件主体代码遵循根目录 `LICENSE`。`JMComic-Crawler-Python/` 下的第三方源码继续遵循其上游 MIT License。

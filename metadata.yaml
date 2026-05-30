@@ -1,6 +1,6 @@
 name: astrbot_plugin_jmcomic
 display_name: JMComic
-desc: Use JMComic-Crawler-Python from AstrBot commands, with download queue, search, info lookup, zip export, cleanup, and size limits.
+desc: 基于 JMComic-Crawler-Python 的 AstrBot 插件，支持查询、搜索、后台下载、自动压缩、队列管理和文件清理。
 version: v1.0.0
 author: Codex
 repo: ""
