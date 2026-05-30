@@ -79,6 +79,18 @@
     "hint": "开启后，zip 成功生成后会删除 downloads 下对应的原始下载目录，只保留 exports 下的 zip。",
     "default": false
   },
+  "zip_password_enabled": {
+    "description": "启用压缩包密码",
+    "type": "bool",
+    "hint": "开启后，自动生成的 zip 会使用密码保护。",
+    "default": true
+  },
+  "zip_password": {
+    "description": "压缩包密码",
+    "type": "string",
+    "hint": "自动生成 zip 时使用的密码。默认 123，请按需修改。",
+    "default": "123"
+  },
   "send_file": {
     "description": "尝试发送文件",
     "type": "bool",

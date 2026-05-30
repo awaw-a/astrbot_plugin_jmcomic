@@ -3,4 +3,5 @@ curl_cffi
 Pillow
 PyYAML
 pycryptodome
+pyzipper
 requests

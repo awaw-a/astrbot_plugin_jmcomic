@@ -48,6 +48,8 @@ jmcomic:
   photo_threads:
   auto_zip: true
   delete_source_after_zip: false
+  zip_password_enabled: true
+  zip_password: "123"
   send_file: true
   send_detail_before_download: true
   send_cover: true
@@ -62,6 +64,8 @@ jmcomic:
 默认保存规则会以 album_id 作为目录名，导出的 zip 也会命名为 `{album_id}.zip`。例如 `JM123456` 会保存到 `downloads/123456/`，导出为 `exports/123456.zip`。
 
 如果开启 `delete_source_after_zip`，zip 成功生成后会删除 `downloads/{album_id}/`，只保留 `exports/{album_id}.zip`。
+
+默认会给自动生成的 zip 设置密码 `123`。可在 WebUI 中通过 `zip_password_enabled` 开关密码保护，并通过 `zip_password` 修改密码。
 
 ## 依赖
 

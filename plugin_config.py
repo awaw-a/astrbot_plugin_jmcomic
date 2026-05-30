@@ -24,6 +24,8 @@ class PluginConfig:
 
     auto_zip: bool = True
     delete_source_after_zip: bool = False
+    zip_password_enabled: bool = True
+    zip_password: str = "123"
     send_file: bool = True
     send_detail_before_download: bool = True
     send_cover: bool = True
@@ -59,6 +61,7 @@ class PluginConfig:
         cfg.image_suffix = str(cfg.image_suffix).strip() if cfg.image_suffix is not None else None
         if cfg.image_suffix == "":
             cfg.image_suffix = None
+        cfg.zip_password = str(cfg.zip_password or "")
         cfg.ensure_dirs()
         cfg.ensure_option_file()
         return cfg

@@ -8,8 +8,26 @@ from datetime import datetime
 from pathlib import Path
 
 
-def zip_directory(src_dir: Path, dest_zip: Path) -> Path:
+def zip_directory(src_dir: Path, dest_zip: Path, password: str | None = None) -> Path:
     dest_zip.parent.mkdir(parents=True, exist_ok=True)
+    if password:
+        try:
+            import pyzipper
+        except ImportError as exc:
+            raise RuntimeError("启用压缩包密码需要安装 pyzipper，请先安装 requirements.txt 中的依赖。") from exc
+
+        with pyzipper.AESZipFile(
+            dest_zip,
+            "w",
+            compression=pyzipper.ZIP_DEFLATED,
+            encryption=pyzipper.WZ_AES,
+        ) as zipf:
+            zipf.setpassword(password.encode("utf-8"))
+            for path in src_dir.rglob("*"):
+                if path.is_file():
+                    zipf.write(path, path.relative_to(src_dir))
+        return dest_zip
+
     with zipfile.ZipFile(dest_zip, "w", zipfile.ZIP_DEFLATED) as zipf:
         for path in src_dir.rglob("*"):
             if path.is_file():

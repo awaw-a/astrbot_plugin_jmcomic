@@ -139,7 +139,8 @@ class TaskManager:
             if self.config.auto_zip:
                 task.status = "packing"
                 archive = self.config.export_dir / f"{task.output_dir.name}.zip"
-                task.archive_path = await asyncio.to_thread(zip_directory, task.output_dir, archive)
+                password = self.config.zip_password if self.config.zip_password_enabled else None
+                task.archive_path = await asyncio.to_thread(zip_directory, task.output_dir, archive, password)
                 send_path = task.archive_path
                 if self.config.delete_source_after_zip and task.output_dir.exists():
                     await asyncio.to_thread(shutil.rmtree, task.output_dir)
